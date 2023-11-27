@@ -271,7 +271,7 @@ enum EReq{
 
 #[derive(CommandEnumTraitMacro, Debug, Clone)]
 #[command_enum_trait(Id = u8, Type = EnumTestType, SerializeIdOrder = 1)]
-enum AF{
+enum AFReq{
     #[command_enum_trait(command_id = 0x00, command_type = EnumTestType::SREQ)]
     Register{
         endpoint: u8, //Endpoint Id of the device
