@@ -1,12 +1,11 @@
 [package]
-name = "mzsh-commandenum"
+name = "mzsh-bitenum"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-mzsh-commandenum_macros = { path = "../mzsh-commandenum_macros" }
 serde = {features = ["derive"]}
 serde_json = {}
 int-enum = {}
