@@ -1,8 +1,5 @@
 use std::marker::PhantomData;
 
-//pub use mzsh_bitenum_macros::BitEnumTraitMacro;
-//pub use bincode;
-
 pub trait BitEnumTrait<T>
 where T: Sized + int_enum::IntEnum,
 <T as int_enum::IntEnum>::Int: Default,
@@ -12,6 +9,7 @@ where T: Sized + int_enum::IntEnum,
     type Values: int_enum::IntEnum;
     fn to_vec(&self) -> Result<Vec<T>, int_enum::IntEnumError<T>>;
     fn from_vec(bits: Vec<T>) -> Self;
+    fn get_val(&self) -> T::Int;
 }
 
 #[derive(Default, Clone, Copy, Debug, Eq, PartialEq, bincode::Encode)]
@@ -91,6 +89,10 @@ where T: Sized + int_enum::IntEnum,
             sum = Some(sum.unwrap_or_default() | bit.int_value());
         }
         Self {data: BitEnumInner { data: sum.unwrap_or_default() }, phantom: PhantomData{}}
+    }
+
+    fn get_val(&self) -> T::Int {
+        self.data.data
     }
 }
 

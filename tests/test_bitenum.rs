@@ -27,6 +27,14 @@ pub(crate) type StartupState = BitEnum<StartupStateValues>;
 
 #[test]
 fn test_macro(){
-    let bitmask = StartupState::from_vec(vec![StartupStateValues::CHANNEL_17, StartupStateValues::CHANNEL_20]);
-    println!("test: {:?}, {:?}", bitmask, bitmask.to_vec());
+    let bitmask1 = StartupState::from_vec(vec![StartupStateValues::CHANNEL_17, StartupStateValues::CHANNEL_20]);
+    println!("test1: {:?}, {:?}", bitmask1, bitmask1.to_vec());
+
+    let data = bincode::encode_to_vec(&(14 as i32), bincode::config::standard()).unwrap();
+    let (bitmask2, _): (StartupState, _) =  bincode::decode_from_slice(data.as_slice(), bincode::config::standard()).unwrap();
+    println!("test2: {:?}, {:?}", bitmask2, bitmask2.to_vec());
+
+    let data = bincode::encode_to_vec(&(0x00402000 as i32), bincode::config::standard()).unwrap();
+    let (bitmask3, _): (StartupState, _) =  bincode::decode_from_slice(data.as_slice(), bincode::config::standard()).unwrap();
+    println!("test3: {:?}, {:?}", bitmask3, bitmask3.to_vec());
 }
