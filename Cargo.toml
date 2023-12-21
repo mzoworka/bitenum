@@ -12,3 +12,4 @@ int-enum = {}
 bincode = { git = "ssh://git@github.com/bincode-org/bincode.git", version = "2.0.0-rc.3" }
 num = { version="0.4.1" }
 bitflags = { version="2.4.1" }
+bincode-aligned = { git = "ssh://git@github.com/mzoworka/bincode-aligned.git" }

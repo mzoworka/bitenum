@@ -1,7 +1,8 @@
 use std::marker::PhantomData;
+use bincode_aligned::{BincodeAlignedFromBincode, BincodeAlignedEncode};
 
 pub trait BitEnumTrait<T>
-where T: Sized + int_enum::IntEnum,
+where T: Sized + int_enum::IntEnum + bincode::Encode,
 <T as int_enum::IntEnum>::Int: Default,
 <T as int_enum::IntEnum>::Int: bincode::Encode,
 <T as int_enum::IntEnum>::Int: bincode::Decode,
@@ -14,7 +15,7 @@ where T: Sized + int_enum::IntEnum,
 
 #[derive(Default, Clone, Copy, Debug, Eq, PartialEq, bincode::Encode)]
 struct BitEnumInner<T> 
-where T: Sized + int_enum::IntEnum,
+where T: Sized + int_enum::IntEnum + bincode::Encode,
 <T as int_enum::IntEnum>::Int: Default,
 <T as int_enum::IntEnum>::Int: bincode::Encode,
 <T as int_enum::IntEnum>::Int: bincode::Decode,
@@ -23,7 +24,7 @@ where T: Sized + int_enum::IntEnum,
 }
 
 impl<T> bincode::Decode for BitEnumInner<T>
-where T: Sized + int_enum::IntEnum,
+where T: Sized + int_enum::IntEnum + bincode::Encode,
 <T as int_enum::IntEnum>::Int: Default,
 <T as int_enum::IntEnum>::Int: bincode::Encode,
 <T as int_enum::IntEnum>::Int: bincode::Decode,
@@ -36,7 +37,7 @@ where T: Sized + int_enum::IntEnum,
 }
 
 impl<'de, T> bincode::BorrowDecode<'de> for BitEnumInner<T>
-where T: Sized + int_enum::IntEnum,
+where T: Sized + int_enum::IntEnum + bincode::Encode,
 <T as int_enum::IntEnum>::Int: Default,
 <T as int_enum::IntEnum>::Int: bincode::Encode,
 <T as int_enum::IntEnum>::Int: bincode::Decode,
@@ -48,9 +49,9 @@ where T: Sized + int_enum::IntEnum,
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, bincode::Encode, bincode::Decode)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, bincode::Encode, bincode::Decode, BincodeAlignedFromBincode)]
 pub struct BitEnum<T>
-where T: Sized + int_enum::IntEnum,
+where T: Sized + int_enum::IntEnum + bincode::Encode,
 <T as int_enum::IntEnum>::Int: Default,
 <T as int_enum::IntEnum>::Int: bincode::Encode,
 <T as int_enum::IntEnum>::Int: bincode::Decode,
@@ -60,7 +61,7 @@ where T: Sized + int_enum::IntEnum,
 }
 
 impl<T> BitEnumTrait<T> for BitEnum<T>
-where T: Sized + int_enum::IntEnum,
+where T: Sized + int_enum::IntEnum + bincode::Encode,
 <T as int_enum::IntEnum>::Int: Default,
 <T as int_enum::IntEnum>::Int: bincode::Encode,
 <T as int_enum::IntEnum>::Int: bincode::Decode,
