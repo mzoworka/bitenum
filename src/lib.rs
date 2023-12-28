@@ -2,10 +2,8 @@ use std::marker::PhantomData;
 use bincode_aligned::{BincodeAlignedFromBincode, BincodeAlignedEncode};
 
 pub trait BitEnumTrait<T>
-where T: Sized + int_enum::IntEnum + bincode::Encode,
+where T: Sized + int_enum::IntEnum,
 <T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode::Encode,
-<T as int_enum::IntEnum>::Int: bincode::Decode,
 {
     type Values: int_enum::IntEnum;
     fn to_vec(&self) -> Result<Vec<T>, int_enum::IntEnumError<T>>;
@@ -13,20 +11,48 @@ where T: Sized + int_enum::IntEnum + bincode::Encode,
     fn get_val(&self) -> T::Int;
 }
 
-#[derive(Default, Clone, Copy, Debug, Eq, PartialEq, bincode::Encode)]
+#[derive(Default, Clone, Copy, Debug, Eq, PartialEq)]
 struct BitEnumInner<T> 
-where T: Sized + int_enum::IntEnum + bincode::Encode,
+where T: Sized + int_enum::IntEnum ,
 <T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode::Encode,
-<T as int_enum::IntEnum>::Int: bincode::Decode,
 {
     data: T::Int,
 }
 
-impl<T> bincode::Decode for BitEnumInner<T>
-where T: Sized + int_enum::IntEnum + bincode::Encode,
+impl<T> bincode_aligned::BincodeAlignedEncode for BitEnumInner<T>
+where T: Sized + int_enum::IntEnum,
+<T as int_enum::IntEnum>::Int: Default,
+<T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedEncode,
+{
+    fn encode<E: bincode::enc::Encoder>(&self, encoder: &mut E, align: &bincode_aligned::BincodeAlignConfig) -> Result<(), bincode::error::EncodeError> {
+        bincode_aligned::BincodeAlignedEncode::encode(&self.data, encoder, align)
+    }
+}
+
+impl<T> bincode_aligned::BincodeAlignedDecode for BitEnumInner<T>
+where T: Sized + int_enum::IntEnum,
+<T as int_enum::IntEnum>::Int: Default,
+<T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedDecode,
+{
+    fn decode<D: bincode::de::Decoder>(decoder: &mut D, align: &bincode_aligned::BincodeAlignConfig) -> Result<Self, bincode::error::DecodeError> where Self: Sized {
+        Ok(Self { data: bincode_aligned::BincodeAlignedDecode::decode(decoder, align)? })
+    }
+}
+
+/*
+impl<T> bincode::Encode for BitEnumInner<T>
+where T: Sized + int_enum::IntEnum,
 <T as int_enum::IntEnum>::Int: Default,
 <T as int_enum::IntEnum>::Int: bincode::Encode,
+{
+    fn encode<E: bincode::enc::Encoder>(&self, encoder: &mut E) -> Result<(), bincode::error::EncodeError> {
+        bincode::Encode::encode(&self.data, encoder)
+    }
+}
+
+impl<T> bincode::Decode for BitEnumInner<T>
+where T: Sized + int_enum::IntEnum,
+<T as int_enum::IntEnum>::Int: Default,
 <T as int_enum::IntEnum>::Int: bincode::Decode,
 {
     fn decode<D: bincode::de::Decoder>(decoder: &mut D) -> Result<Self, bincode::error::DecodeError> {
@@ -37,9 +63,8 @@ where T: Sized + int_enum::IntEnum + bincode::Encode,
 }
 
 impl<'de, T> bincode::BorrowDecode<'de> for BitEnumInner<T>
-where T: Sized + int_enum::IntEnum + bincode::Encode,
+where T: Sized + int_enum::IntEnum ,
 <T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode::Encode,
 <T as int_enum::IntEnum>::Int: bincode::Decode,
 {  
     fn borrow_decode<D: bincode::de::BorrowDecoder<'de>>(
@@ -48,24 +73,20 @@ where T: Sized + int_enum::IntEnum + bincode::Encode,
         bincode::Decode::decode(decoder)
     }
 }
+*/
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, bincode::Encode, bincode::Decode, BincodeAlignedFromBincode)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct BitEnum<T>
-where T: Sized + int_enum::IntEnum + bincode::Encode,
+where T: Sized + int_enum::IntEnum,
 <T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode::Encode,
-<T as int_enum::IntEnum>::Int: bincode::Decode,
 {
     data: BitEnumInner<T>,
     phantom: PhantomData<T>,
 }
 
 impl<T> BitEnumTrait<T> for BitEnum<T>
-where T: Sized + int_enum::IntEnum + bincode::Encode,
+where T: Sized + int_enum::IntEnum,
 <T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode::Encode,
-<T as int_enum::IntEnum>::Int: bincode::Decode,
-<T as int_enum::IntEnum>::Int: bincode::BorrowDecode<'static>
 {
     type Values = T;
     fn to_vec(&self) -> Result<Vec<Self::Values>, int_enum::IntEnumError<Self::Values>> {
