@@ -118,3 +118,23 @@ where T: Sized + int_enum::IntEnum,
     }
 }
 
+
+impl<T> bincode_aligned::BincodeAlignedEncode for BitEnum<T>
+where T: Sized + int_enum::IntEnum,
+<T as int_enum::IntEnum>::Int: Default,
+<T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedEncode,
+{
+    fn encode<E: bincode::enc::Encoder>(&self, encoder: &mut E, align: &bincode_aligned::BincodeAlignConfig) -> Result<(), bincode::error::EncodeError> {
+        bincode_aligned::BincodeAlignedEncode::encode(&self.data, encoder, align)
+    }
+}
+
+impl<T> bincode_aligned::BincodeAlignedDecode for BitEnum<T>
+where T: Sized + int_enum::IntEnum,
+<T as int_enum::IntEnum>::Int: Default,
+<T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedDecode,
+{
+    fn decode<D: bincode::de::Decoder>(decoder: &mut D, align: &bincode_aligned::BincodeAlignConfig) -> Result<Self, bincode::error::DecodeError> where Self: Sized {
+        Ok(Self { data: bincode_aligned::BincodeAlignedDecode::decode(decoder, align)?, phantom:PhantomData{} })
+    }
+}
