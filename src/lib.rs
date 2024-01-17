@@ -1,5 +1,4 @@
 use std::marker::PhantomData;
-use bincode_aligned::{BincodeAlignedFromBincode, BincodeAlignedEncode};
 
 pub trait BitEnumTrait<T>
 where T: Sized + int_enum::IntEnum,
@@ -8,6 +7,7 @@ where T: Sized + int_enum::IntEnum,
     type Values: int_enum::IntEnum;
     fn to_vec(&self) -> Result<Vec<T>, int_enum::IntEnumError<T>>;
     fn from_vec(bits: Vec<T>) -> Self;
+    fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>> where Self: Sized;
     fn get_val(&self) -> T::Int;
 }
 
@@ -38,42 +38,6 @@ where T: Sized + int_enum::IntEnum,
         Ok(Self { data: bincode_aligned::BincodeAlignedDecode::decode(decoder, align)? })
     }
 }
-
-/*
-impl<T> bincode::Encode for BitEnumInner<T>
-where T: Sized + int_enum::IntEnum,
-<T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode::Encode,
-{
-    fn encode<E: bincode::enc::Encoder>(&self, encoder: &mut E) -> Result<(), bincode::error::EncodeError> {
-        bincode::Encode::encode(&self.data, encoder)
-    }
-}
-
-impl<T> bincode::Decode for BitEnumInner<T>
-where T: Sized + int_enum::IntEnum,
-<T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode::Decode,
-{
-    fn decode<D: bincode::de::Decoder>(decoder: &mut D) -> Result<Self, bincode::error::DecodeError> {
-        Ok(
-            Self { data: bincode::Decode::decode(decoder)? }
-        )
-    }
-}
-
-impl<'de, T> bincode::BorrowDecode<'de> for BitEnumInner<T>
-where T: Sized + int_enum::IntEnum ,
-<T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode::Decode,
-{  
-    fn borrow_decode<D: bincode::de::BorrowDecoder<'de>>(
-        decoder: &mut D,
-    ) -> core::result::Result<Self, bincode::error::DecodeError> {
-        bincode::Decode::decode(decoder)
-    }
-}
-*/
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct BitEnum<T>
@@ -115,6 +79,20 @@ where T: Sized + int_enum::IntEnum,
 
     fn get_val(&self) -> T::Int {
         self.data.data
+    }
+
+    fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>> {
+        let mut sum = None;
+        let mut data = bits;
+        for i in 0..(std::mem::size_of::<T::Int>()*8) {
+            let test = data >> i;
+            if test << i != data {
+                let bit = data ^ (test << i);
+                data = data ^ bit;
+                sum = Some(sum.unwrap_or_default() | T::from_int(bit)?.int_value());
+            }
+        }
+        Ok(Self {data: BitEnumInner { data: sum.unwrap_or_default() }, phantom: PhantomData{}})
     }
 }
 
