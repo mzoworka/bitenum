@@ -1,71 +1,91 @@
 use std::marker::PhantomData;
 
 pub trait BitEnumTrait<T>
-where T: Sized + int_enum::IntEnum,
-<T as int_enum::IntEnum>::Int: Default,
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int: Default,
 {
     type Values: int_enum::IntEnum;
     fn to_vec(&self) -> Result<Vec<T>, int_enum::IntEnumError<T>>;
     fn from_vec(bits: Vec<T>) -> Self;
-    fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>> where Self: Sized;
+    fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>>
+    where
+        Self: Sized;
     fn get_val(&self) -> T::Int;
 }
 
 #[derive(Default, Clone, Copy, Debug, Eq, PartialEq)]
-struct BitEnumInner<T> 
-where T: Sized + int_enum::IntEnum ,
-<T as int_enum::IntEnum>::Int: Default,
+struct BitEnumInner<T>
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int: Default,
 {
     data: T::Int,
 }
 
 impl<T> bincode_aligned::BincodeAlignedEncode for BitEnumInner<T>
-where T: Sized + int_enum::IntEnum,
-<T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedEncode,
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int: Default,
+    <T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedEncode,
 {
-    fn encode<E: bincode::enc::Encoder>(&self, encoder: &mut E, align: &bincode_aligned::BincodeAlignConfig) -> Result<(), bincode::error::EncodeError> {
+    fn encode<E: bincode::enc::Encoder>(
+        &self,
+        encoder: &mut E,
+        align: &bincode_aligned::BincodeAlignConfig,
+    ) -> Result<(), bincode::error::EncodeError> {
         bincode_aligned::BincodeAlignedEncode::encode(&self.data, encoder, align)
     }
 }
 
 impl<T> bincode_aligned::BincodeAlignedDecode for BitEnumInner<T>
-where T: Sized + int_enum::IntEnum,
-<T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedDecode,
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int: Default,
+    <T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedDecode,
 {
-    fn decode<D: bincode::de::Decoder>(decoder: &mut D, align: &bincode_aligned::BincodeAlignConfig) -> Result<Self, bincode::error::DecodeError> where Self: Sized {
-        Ok(Self { data: bincode_aligned::BincodeAlignedDecode::decode(decoder, align)? })
+    fn decode<D: bincode::de::Decoder>(
+        decoder: &mut D,
+        align: &bincode_aligned::BincodeAlignConfig,
+    ) -> Result<Self, bincode::error::DecodeError>
+    where
+        Self: Sized,
+    {
+        Ok(Self {
+            data: bincode_aligned::BincodeAlignedDecode::decode(decoder, align)?,
+        })
     }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct BitEnum<T>
-where T: Sized + int_enum::IntEnum,
-<T as int_enum::IntEnum>::Int: Default,
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int: Default,
 {
     data: BitEnumInner<T>,
     phantom: PhantomData<T>,
 }
 
 impl<T> BitEnumTrait<T> for BitEnum<T>
-where T: Sized + int_enum::IntEnum,
-<T as int_enum::IntEnum>::Int: Default,
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int: Default,
 {
     type Values = T;
     fn to_vec(&self) -> Result<Vec<Self::Values>, int_enum::IntEnumError<Self::Values>> {
         let mut v = vec![];
 
-        let mut data = self.data.data;        
-        for i in 0..(std::mem::size_of::<T::Int>()*8) {
+        let mut data = self.data.data;
+        for i in 0..(std::mem::size_of::<T::Int>() * 8) {
             let test = data >> i;
             if test << i != data {
                 let old_data = data;
                 data = test << i;
                 v.push(T::from_int(old_data & !data)?)
             }
-        }       
-        
+        }
+
         Ok(v)
     }
 
@@ -74,7 +94,12 @@ where T: Sized + int_enum::IntEnum,
         for bit in bits {
             sum = Some(sum.unwrap_or_default() | bit.int_value());
         }
-        Self {data: BitEnumInner { data: sum.unwrap_or_default() }, phantom: PhantomData{}}
+        Self {
+            data: BitEnumInner {
+                data: sum.unwrap_or_default(),
+            },
+            phantom: PhantomData {},
+        }
     }
 
     fn get_val(&self) -> T::Int {
@@ -84,7 +109,7 @@ where T: Sized + int_enum::IntEnum,
     fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>> {
         let mut sum = None;
         let mut data = bits;
-        for i in 0..(std::mem::size_of::<T::Int>()*8) {
+        for i in 0..(std::mem::size_of::<T::Int>() * 8) {
             let test = data >> i;
             if test << i != data {
                 let bit = data ^ (test << i);
@@ -92,27 +117,46 @@ where T: Sized + int_enum::IntEnum,
                 sum = Some(sum.unwrap_or_default() | T::from_int(bit)?.int_value());
             }
         }
-        Ok(Self {data: BitEnumInner { data: sum.unwrap_or_default() }, phantom: PhantomData{}})
+        Ok(Self {
+            data: BitEnumInner {
+                data: sum.unwrap_or_default(),
+            },
+            phantom: PhantomData {},
+        })
     }
 }
 
-
 impl<T> bincode_aligned::BincodeAlignedEncode for BitEnum<T>
-where T: Sized + int_enum::IntEnum,
-<T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedEncode,
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int: Default,
+    <T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedEncode,
 {
-    fn encode<E: bincode::enc::Encoder>(&self, encoder: &mut E, align: &bincode_aligned::BincodeAlignConfig) -> Result<(), bincode::error::EncodeError> {
+    fn encode<E: bincode::enc::Encoder>(
+        &self,
+        encoder: &mut E,
+        align: &bincode_aligned::BincodeAlignConfig,
+    ) -> Result<(), bincode::error::EncodeError> {
         bincode_aligned::BincodeAlignedEncode::encode(&self.data, encoder, align)
     }
 }
 
 impl<T> bincode_aligned::BincodeAlignedDecode for BitEnum<T>
-where T: Sized + int_enum::IntEnum,
-<T as int_enum::IntEnum>::Int: Default,
-<T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedDecode,
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int: Default,
+    <T as int_enum::IntEnum>::Int: bincode_aligned::BincodeAlignedDecode,
 {
-    fn decode<D: bincode::de::Decoder>(decoder: &mut D, align: &bincode_aligned::BincodeAlignConfig) -> Result<Self, bincode::error::DecodeError> where Self: Sized {
-        Ok(Self { data: bincode_aligned::BincodeAlignedDecode::decode(decoder, align)?, phantom:PhantomData{} })
+    fn decode<D: bincode::de::Decoder>(
+        decoder: &mut D,
+        align: &bincode_aligned::BincodeAlignConfig,
+    ) -> Result<Self, bincode::error::DecodeError>
+    where
+        Self: Sized,
+    {
+        Ok(Self {
+            data: bincode_aligned::BincodeAlignedDecode::decode(decoder, align)?,
+            phantom: PhantomData {},
+        })
     }
 }

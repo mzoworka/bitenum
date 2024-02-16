@@ -1,5 +1,5 @@
-use int_enum::IntEnum;
 use bitenum::{BitEnum, BitEnumTrait};
+use int_enum::IntEnum;
 
 #[allow(non_camel_case_types)]
 #[repr(u32)]
@@ -26,15 +26,28 @@ pub(crate) enum StartupStateValues {
 pub(crate) type StartupState = BitEnum<StartupStateValues>;
 
 #[test]
-fn test_macro(){
-    let bitmask1 = StartupState::from_vec(vec![StartupStateValues::CHANNEL_17, StartupStateValues::CHANNEL_20]);
+fn test_macro() {
+    let bitmask1 = StartupState::from_vec(vec![
+        StartupStateValues::CHANNEL_17,
+        StartupStateValues::CHANNEL_20,
+    ]);
     println!("test1: {:?}, {:?}", bitmask1, bitmask1.to_vec());
 
     let data = bincode::encode_to_vec(&(14 as i32), bincode::config::standard()).unwrap();
-    let bitmask2: StartupState =  bincode_aligned::decode_from_reader(&mut std::io::BufReader::new(data.as_slice()), bincode::config::standard(), &bincode_aligned::BincodeAlignConfig::Packed).unwrap();
+    let bitmask2: StartupState = bincode_aligned::decode_from_reader(
+        &mut std::io::BufReader::new(data.as_slice()),
+        bincode::config::standard(),
+        &bincode_aligned::BincodeAlignConfig::Packed,
+    )
+    .unwrap();
     println!("test2: {:?}, {:?}", bitmask2, bitmask2.to_vec());
 
     let data = bincode::encode_to_vec(&(0x00402000 as i32), bincode::config::standard()).unwrap();
-    let bitmask3: StartupState =  bincode_aligned::decode_from_reader(&mut std::io::BufReader::new(data.as_slice()), bincode::config::standard(), &bincode_aligned::BincodeAlignConfig::Packed).unwrap();
+    let bitmask3: StartupState = bincode_aligned::decode_from_reader(
+        &mut std::io::BufReader::new(data.as_slice()),
+        bincode::config::standard(),
+        &bincode_aligned::BincodeAlignConfig::Packed,
+    )
+    .unwrap();
     println!("test3: {:?}, {:?}", bitmask3, bitmask3.to_vec());
 }
