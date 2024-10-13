@@ -12,6 +12,7 @@ where
     where
         Self: Sized;
     fn get_val(&self) -> T::Int;
+    fn contains(&self, bit: &T) -> bool;
 }
 
 #[derive(Default, Clone, Copy, Debug, Eq, PartialEq)]
@@ -123,6 +124,11 @@ where
             },
             phantom: PhantomData {},
         })
+    }
+
+    fn contains(&self, bit: &T) -> bool {
+        let data = self.data.data;
+        (data & bit.int_value()) != T::Int::default()
     }
 }
 
