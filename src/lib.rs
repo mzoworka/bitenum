@@ -78,12 +78,10 @@ where
         let mut v = vec![];
 
         let mut data = self.data.data;
-        println!("to_vec: {}", data);
         for i in (0..((std::mem::size_of::<T::Int>() * 8) - 1)).rev() {
             let test = data >> i;
             let bit = test << i;
             if bit != Default::default() {
-                println!("to_vec: {}, {}, {}", i, data, bit);
                 data = data ^ bit;
                 v.push(T::from_int(bit)?)
             }
@@ -112,12 +110,10 @@ where
     fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>> {
         let mut sum = None;
         let mut data = bits;
-        println!("from_int: {}", data);
         for i in (0..((std::mem::size_of::<T::Int>() * 8) - 1)).rev() {
             let test = data >> i;
             let bit = test << i;
             if bit != Default::default() {
-                println!("from_int: {}, {}, {}", i, data, bit);
                 data = data ^ bit;
                 sum = Some(sum.unwrap_or_default() | T::from_int(bit)?.int_value());
             }
