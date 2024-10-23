@@ -78,7 +78,7 @@ where
         let mut v = vec![];
 
         let mut data = self.data.data;
-        for i in 0..(std::mem::size_of::<T::Int>() * 8) {
+        for i in ((std::mem::size_of::<T::Int>() * 8) - 1)..0 {
             let test = data >> i;
             if test << i != data {
                 let old_data = data;
@@ -110,7 +110,7 @@ where
     fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>> {
         let mut sum = None;
         let mut data = bits;
-        for i in 0..(std::mem::size_of::<T::Int>() * 8) {
+        for i in ((std::mem::size_of::<T::Int>() * 8) - 1)..0 {
             let test = data >> i;
             if test << i != data {
                 let bit = data ^ (test << i);
