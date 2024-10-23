@@ -81,9 +81,9 @@ where
         for i in ((std::mem::size_of::<T::Int>() * 8) - 1)..0 {
             let test = data >> i;
             if test << i != data {
-                let old_data = data;
-                data = test << i;
-                v.push(T::from_int(old_data & !data)?)
+                let bit = data ^ (test << i);
+                data = data ^ bit;
+                v.push(T::from_int(bit)?)
             }
         }
 
