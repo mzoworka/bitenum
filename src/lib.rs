@@ -170,8 +170,7 @@ where
 impl<'a, T> serde::Deserialize<'a> for BitEnum<T>
 where
     T: Sized + int_enum::IntEnum,
-    <T as int_enum::IntEnum>::Int:
-        Default + bincode_aligned::BincodeAlignedDecode + serde::Deserialize<'a>,
+    <T as int_enum::IntEnum>::Int: Default + serde::Deserialize<'a>,
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -189,8 +188,7 @@ where
 impl<T> serde::Serialize for BitEnum<T>
 where
     T: Sized + int_enum::IntEnum,
-    <T as int_enum::IntEnum>::Int:
-        Default + bincode_aligned::BincodeAlignedDecode + serde::Serialize,
+    <T as int_enum::IntEnum>::Int: Default + serde::Serialize,
 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
