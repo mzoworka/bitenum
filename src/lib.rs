@@ -166,3 +166,36 @@ where
         })
     }
 }
+
+impl<'a, T> serde::Deserialize<'a> for BitEnum<T>
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int:
+        Default + bincode_aligned::BincodeAlignedDecode + serde::Deserialize<'a>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'a>,
+    {
+        Ok(Self {
+            data: BitEnumInner {
+                data: serde::de::Deserialize::deserialize(deserializer)?,
+            },
+            phantom: PhantomData,
+        })
+    }
+}
+
+impl<T> serde::Serialize for BitEnum<T>
+where
+    T: Sized + int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int:
+        Default + bincode_aligned::BincodeAlignedDecode + serde::Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serde::ser::Serialize::serialize(&self.data.data, serializer)
+    }
+}
