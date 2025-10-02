@@ -12,4 +12,10 @@ int-enum = { version="0.5.*" }
 bincode = { version = "2.0.1" }
 num = { version="0.4.1" }
 bitflags = { version="2.4.1" }
-bincode-aligned = { git = "ssh://git@bincode_aligned.github.com/mzoworka/bincode-aligned.git" }
+bincode-aligned = { git = "ssh://git@bincode_aligned.github.com/mzoworka/bincode-aligned.git", default-features=false, features=["derive"] }
+
+[lints.clippy]
+unwrap_used = "warn"
+enum_glob_use = "warn"
+#pedantic = "warn"
+#nursery = "warn"
