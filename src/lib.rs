@@ -81,7 +81,7 @@ where
             let bit = test << i;
             if bit != Default::default() {
                 data = data ^ bit;
-                v.push(T::from_int(bit)?)
+                v.push(T::from_int(bit)?);
             }
         }
 
