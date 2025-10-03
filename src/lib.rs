@@ -9,10 +9,11 @@ where
     fn to_vec(&self) -> Result<Vec<T>, int_enum::IntEnumError<T>>;
     fn from_slice(bits: &[T]) -> Self;
     fn from_iter<'a, I: IntoIterator<Item=&'a T>>(bits: I) -> Self
-    where T: 'a;
+        where T: 'a;
+    fn try_from_iter<E, I: IntoIterator<Item=Result<T, E>>>(bits: I) -> Result<Self, E>
+        where Self: Sized;
     fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>>
-    where
-        Self: Sized;
+        where Self: Sized;
     fn get_val(&self) -> T::Int;
     fn contains(&self, bit: &T) -> bool;
     fn add_bit(self, bit: &T) -> Self;
@@ -119,6 +120,20 @@ where
             },
             phantom: PhantomData {},
         }
+    }
+
+    fn try_from_iter<E, I: IntoIterator<Item=Result<T, E>>>(bits: I) -> Result<Self, E>
+    {
+        let mut sum = None;
+        for bit in bits {
+            sum = Some(sum.unwrap_or_default() | bit?.int_value());
+        }
+        Ok(Self {
+            data: BitEnumInner {
+                data: sum.unwrap_or_default(),
+            },
+            phantom: PhantomData {},
+        })
     }
 
     fn get_val(&self) -> T::Int {
