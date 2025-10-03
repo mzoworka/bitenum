@@ -7,12 +7,15 @@ where
 {
     type Values: int_enum::IntEnum;
     fn to_vec(&self) -> Result<Vec<T>, int_enum::IntEnumError<T>>;
-    fn from_vec(bits: Vec<T>) -> Self;
+    fn from_slice(bits: &[T]) -> Self;
     fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>>
     where
         Self: Sized;
     fn get_val(&self) -> T::Int;
     fn contains(&self, bit: &T) -> bool;
+    fn add_bit(self, bit: &T) -> Self;
+    fn remove_bit(self, bit: &T) -> Self;
+    fn xor_bit(self, bit: &T) -> Self;
 }
 
 #[derive(Default, Clone, Copy, Debug, Eq, PartialEq)]
@@ -88,7 +91,7 @@ where
         Ok(v)
     }
 
-    fn from_vec(bits: Vec<Self::Values>) -> Self {
+    fn from_slice(bits: &[Self::Values]) -> Self {
         let mut sum = None;
         for bit in bits {
             sum = Some(sum.unwrap_or_default() | bit.int_value());
@@ -127,6 +130,39 @@ where
     fn contains(&self, bit: &T) -> bool {
         let data = self.data.data;
         (data & bit.int_value()) != T::Int::default()
+    }
+    
+    fn add_bit(self, bit: &T) -> Self {
+        let mut sum = self.data.data;
+        sum = sum | bit.int_value();
+        Self {
+            data: BitEnumInner {
+                data: sum,
+            },
+            phantom: PhantomData {},
+        }
+    }
+    
+    fn remove_bit(self, bit: &T) -> Self {
+        let mut sum = self.data.data;
+        sum = sum & !bit.int_value();
+        Self {
+            data: BitEnumInner {
+                data: sum,
+            },
+            phantom: PhantomData {},
+        }
+    }
+    
+    fn xor_bit(self, bit: &T) -> Self {
+        let mut sum = self.data.data;
+        sum = sum ^ bit.int_value();
+        Self {
+            data: BitEnumInner {
+                data: sum,
+            },
+            phantom: PhantomData {},
+        }
     }
 }
 

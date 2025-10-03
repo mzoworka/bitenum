@@ -27,7 +27,7 @@ pub(crate) type StartupState = BitEnum<StartupStateValues>;
 
 #[test]
 fn test_macro() {
-    let bitmask1 = StartupState::from_vec(vec![
+    let bitmask1 = StartupState::from_slice(&[
         StartupStateValues::CHANNEL_17,
         StartupStateValues::CHANNEL_20,
     ]);
