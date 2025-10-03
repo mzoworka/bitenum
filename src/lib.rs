@@ -8,6 +8,7 @@ where
     type Values: int_enum::IntEnum;
     fn to_vec(&self) -> Result<Vec<T>, int_enum::IntEnumError<T>>;
     fn from_slice(bits: &[T]) -> Self;
+    fn from_iter<I: IntoIterator<Item=T>>(bits: I) -> Self;
     fn from_int(bits: <T as int_enum::IntEnum>::Int) -> Result<Self, int_enum::IntEnumError<T>>
     where
         Self: Sized;
@@ -92,6 +93,19 @@ where
     }
 
     fn from_slice(bits: &[Self::Values]) -> Self {
+        let mut sum = None;
+        for bit in bits {
+            sum = Some(sum.unwrap_or_default() | bit.int_value());
+        }
+        Self {
+            data: BitEnumInner {
+                data: sum.unwrap_or_default(),
+            },
+            phantom: PhantomData {},
+        }
+    }
+
+    fn from_iter<I: IntoIterator<Item=T>>(bits: I) -> Self {
         let mut sum = None;
         for bit in bits {
             sum = Some(sum.unwrap_or_default() | bit.int_value());
