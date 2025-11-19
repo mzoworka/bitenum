@@ -263,3 +263,15 @@ where
         serde::ser::Serialize::serialize(&self.data.data, serializer)
     }
 }
+
+impl<T> Default for BitEnum<T>
+where 
+    T: int_enum::IntEnum,
+    <T as int_enum::IntEnum>::Int: Default
+{
+    fn default() -> Self {
+        Self { data: BitEnumInner{
+            data: <T as int_enum::IntEnum>::Int::default(),
+        }, phantom: PhantomData::default() }
+    }
+}
