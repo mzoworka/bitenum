@@ -272,6 +272,6 @@ where
     fn default() -> Self {
         Self { data: BitEnumInner{
             data: <T as int_enum::IntEnum>::Int::default(),
-        }, phantom: PhantomData::default() }
+        }, phantom: PhantomData {} }
     }
 }
