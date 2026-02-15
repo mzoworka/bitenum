@@ -6,14 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde = { version = "1.0.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.96"
-int-enum = { version="1.2.0" }
+int-enum = { version="0.5.*" }
 bincode = { version = "2.0.1" }
 num = { version="0.4.1" }
-bitflags = { version="2.11.0" }
+bitflags = { version="2.4.1" }
 bincode-aligned = { git = "ssh://git@bincode_aligned.github.com/mzoworka/bincode-aligned.git", default-features=false, features=["derive"] }
-thiserror = { version="2.0.18" }
 
 [lints.clippy]
 unwrap_used = "warn"
