@@ -2,8 +2,13 @@ use std::{fmt::Debug, marker::PhantomData, ops::{Add, AddAssign, BitAnd, BitAndA
 
 pub trait IntTrait: Debug + Clone + Copy + Default + PartialEq + PartialOrd + Eq + Ord + Shr<Output=Self> + Shl<Output=Self> + ShrAssign + ShlAssign + Add<Output=Self> + AddAssign + Sub<Output=Self> + SubAssign + Shl<usize, Output=Self> + Shr<usize, Output=Self> + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> + BitAndAssign + BitOrAssign + BitXorAssign + Not<Output=Self> {}
 
+impl<T> IntTrait for T 
+where 
+    T: Debug + Clone + Copy + Default + PartialEq + PartialOrd + Eq + Ord + Shr<Output=T> + Shl<Output=T> + ShrAssign + ShlAssign + Add<Output=T> + AddAssign + Sub<Output=T> + SubAssign + Shl<usize, Output=T> + Shr<usize, Output=T> + BitAnd<Output=T> + BitOr<Output=T> + BitXor<Output=T> + BitAndAssign + BitOrAssign + BitXorAssign + Not<Output=T>
+{}
+
 pub trait IntEnumTrait: Copy + Clone + TryFrom<Self::Int>{
-    type Int: Debug + Clone + Copy + Default + PartialEq + PartialOrd + Eq + Ord + Shr<Output=Self::Int> + Shl<Output=Self::Int> + ShrAssign + ShlAssign + Add<Output=Self::Int> + AddAssign + Sub<Output=Self::Int> + SubAssign + Shl<usize, Output=Self::Int> + Shr<usize, Output=Self::Int> + BitAnd<Output=Self::Int> + BitOr<Output=Self::Int> + BitXor<Output=Self::Int> + BitAndAssign + BitOrAssign + BitXorAssign + Not<Output=Self::Int> + From<Self>;
+    type Int: IntTrait + From<Self>;
 }
 
 pub trait BitEnumTrait<T>
