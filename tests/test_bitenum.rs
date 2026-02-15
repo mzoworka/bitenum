@@ -1,4 +1,4 @@
-use bitenum::{BitEnum, BitEnumTrait};
+use bitenum::{BitEnum, BitEnumTrait, IntEnumTrait};
 use int_enum::IntEnum;
 
 #[allow(non_camel_case_types)]
@@ -21,6 +21,9 @@ pub(crate) enum StartupStateValues {
     CHANNEL_24 = 0x01000000,
     CHANNEL_25 = 0x02000000,
     CHANNEL_26 = 0x04000000,
+}
+impl IntEnumTrait for StartupStateValues {
+    type Int = u32;
 }
 
 pub(crate) type StartupState = BitEnum<StartupStateValues>;
